@@ -46,7 +46,7 @@ def verbose_output(func):
         if self.verbose:
             try:
                 print('%s - %s in %s ms' % (
-                    str(func.__name__).capitalize(),
+                    str(func.__name__).upper(),
                     str(r.url),
                     str(r.elapsed.microseconds / 1000)
                 ))

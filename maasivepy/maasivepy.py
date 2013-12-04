@@ -25,7 +25,7 @@ def pr_pretty(func):
     def wrapper(*args, **kwargs):
         self = args[0]
         r = func(*args, **kwargs)
-        if self.print_pretty and r.status_code == requests.codes.ok:
+        if self.print_pretty and r is not None:
             try:
                 print(json.dumps(r.json(), sort_keys=True, indent=2))
             except ValueError as e:

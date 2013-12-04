@@ -12,7 +12,11 @@ def limit_rate(func):
         if self.rl_window_ts == 0:
             self.rl_window_ts = time()
         if self.rl_window_count >= self.rps:
+            if self.verbose is True:
+                print('sleeping...')
             sleep(1)
+            if self.verbose is True:
+                print('done sleeping.')
             self.rl_window_count = 0
             self.rl_window_ts = time()
         self.rl_window_count += 1
@@ -41,7 +45,12 @@ def verbose_output(func):
         r = func(*args, **kwargs)
         if self.verbose:
             try:
-                print('time elapsed: %s ms' % str(r.elapsed.microseconds / 1000))
+                print('%s - %s in %s ms' % (
+                    str(func.__name__).capitalize(),
+                    str(r.url),
+                    str(r.elapsed.microseconds / 1000)
+                ))
+                # print('time elapsed: %s ms' % str(r.elapsed.microseconds / 1000))
             except ValueError as e:
                 print(e)
         return r
@@ -56,7 +65,8 @@ class MaaSiveAPISession(object):
     api_uri = https://maasive.net/v2/<api_id>
     """
 
-    def __init__(self, api_uri, requests_per_second=1, print_pretty=False, verbose=True):
+    def __init__(
+            self, api_uri, requests_per_second=1, print_pretty=False, verbose=False):
         self.api_uri = api_uri
         self.last_call_timestamp = 0
         self.session = requests.Session()
@@ -65,6 +75,7 @@ class MaaSiveAPISession(object):
         self.rl_window_count = 0
         self.print_pretty = print_pretty
         self.verbose = verbose
+        self.current_user = None
 
     @limit_rate
     @pr_pretty
@@ -74,8 +85,9 @@ class MaaSiveAPISession(object):
             self.api_uri + '/auth/login/',
             data=json.dumps({"email": email,
                              "password": password}))
-        if r.status_code != 200:
+        if r.status_code != requests.codes.ok:
             raise ValueError('login error: %s' % str(r.reason))
+        self.current_user = r.json()
         return r
 
     @limit_rate

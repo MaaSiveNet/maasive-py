@@ -11,14 +11,22 @@ def limit_rate(func):
         self = args[0]
         if self.rl_window_ts == 0:
             self.rl_window_ts = time()
-        if self.rl_window_count >= self.rps:
-            if self.verbose is True:
-                print('sleeping...')
-            sleep(1)
-            if self.verbose is True:
-                print('done sleeping.')
+        elif time() - self.rl_window_ts < 1:
+            # still inside the window
+            if self.rl_window_count >= self.rps:
+                sleep_time = time() - self.rl_window_ts
+                if self.verbose is True:
+                    print('sleeping for %s...' % str(sleep_time))
+                sleep(sleep_time)
+                self.rl_window_count = 0
+                self.rl_window_ts = time()
+        else:
+            # new time window, new request quota
             self.rl_window_count = 0
             self.rl_window_ts = time()
+        # increment the count and execute the request
+        if self.verbose is True:
+            print('sending the request')
         self.rl_window_count += 1
         return func(*args, **kwargs)
     return wrapper
@@ -66,14 +74,14 @@ class MaaSiveAPISession(object):
     """
 
     def __init__(
-            self, api_uri, requests_per_second=1, print_pretty=False, verbose=False):
+            self, api_uri, requests_per_second=1, verbose=False):
         self.api_uri = api_uri
         self.last_call_timestamp = 0
         self.session = requests.Session()
         self.rl_window_ts = 0
         self.rps = requests_per_second
         self.rl_window_count = 0
-        self.print_pretty = print_pretty
+        self.print_pretty = verbose
         self.verbose = verbose
         self.current_user = None
 

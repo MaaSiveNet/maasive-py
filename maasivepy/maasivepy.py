@@ -36,8 +36,9 @@ def pr_pretty(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         self = args[0]
+        pretty = kwargs.pop('pretty', False)
         r = func(*args, **kwargs)
-        if self.print_pretty and r is not None:
+        if (self.print_pretty or pretty) and r is not None:
             try:
                 print(json.dumps(r.json(), sort_keys=True, indent=2))
             except ValueError as e:
@@ -61,6 +62,8 @@ def verbose_output(func):
                 # print('time elapsed: %s ms' % str(r.elapsed.microseconds / 1000))
             except ValueError as e:
                 print(e)
+        else:
+            print(r.status_code)
         return r
     return wrapper
 

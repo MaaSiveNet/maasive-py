@@ -6,7 +6,7 @@ A Python SDK for MaaSive.net
 
 Install with pip
 
-  pip install -e git+https://github.com/MaaSiveNet/maasive-py.git@v1.2#egg=maasive-py
+  pip install -e git+https://github.com/MaaSiveNet/maasive-py.git@v1.2.1#egg=maasive-py
 
 ## Usage
 
@@ -16,3 +16,13 @@ Install with pip
     m.get('/comments/')
 
 Check us out at [https://maassive.net](https://maassive.net)
+
+## Changelog
+
+**version 1.2.1**
+
+- APISession object to package init
+- APISession history
+- automatic serialization to JSON
+- built-in pretty print to response objects and APISession
+- support for X-Admin-Key and X-Auth-Token headers in APISession constructor

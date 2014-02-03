@@ -132,9 +132,11 @@ class MaaSiveAPISession(object):
         self.current_user = None
         if admin_key and auth_token:
             raise ValueError('use only one of api_key or auth_token')
+        self.admin_key = None
         if admin_key:
-            self.api_key = admin_key
+            self.admin_key = admin_key
             self.session.headers.update({'X-Admin-Key': admin_key})
+        self.auth_token = None
         if auth_token:
             self.auth_token = auth_token
             self.session.headers.update({'X-Auth-Token': auth_token})

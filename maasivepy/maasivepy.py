@@ -264,27 +264,27 @@ class MaaSiveAPISession(object):
 
     @limit_rate
     @pr_pretty
-    @verbose_output
     @track_history
     @batch_write_iterator
+    @verbose_output
     @serialize_json_data
     def post(self, url, **kwargs):
         return self.session.post(''.join([self.api_uri, url]), **kwargs)
 
     @limit_rate
     @pr_pretty
-    @verbose_output
     @track_history
     @batch_write_iterator
+    @verbose_output
     @serialize_json_data
     def put(self, url, **kwargs):
         return self.session.put(''.join([self.api_uri, url]), **kwargs)
 
     @limit_rate
     @pr_pretty
-    @verbose_output
     @track_history
     @serialize_json_data
     @limit_zero_read_iterator
+    @verbose_output
     def delete(self, url, **kwargs):
         return self.session.delete(''.join([self.api_uri, url]), **kwargs)

@@ -30,6 +30,7 @@ def limit_rate(func):
         # increment the count and execute the request
         self.rl_window_count += 1
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -46,6 +47,7 @@ def pr_pretty(func):
             pretty = r.json()
         r.pprint = partial(lib_pprint, pretty)
         return r
+
     return wrapper
 
 
@@ -73,6 +75,7 @@ def verbose_output(func):
             )
         print(status_msg)
         return r
+
     return wrapper
 
 
@@ -92,6 +95,7 @@ def serialize_json_data(func):
                     'Content-Type': 'application/json'
                 }
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -103,6 +107,73 @@ def track_history(func):
         h = (r.request.method, r.url, r)
         self._history.appendleft(h)
         return r
+
+    return wrapper
+
+
+LIMIT_RE = re.compile(r'(limit=0)($|&)')
+OFFSET_RE = re.compile(r'(offset=[0-9a-fA-F]{24})($|&)')
+
+
+def limit_zero_read_iterator(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        self = args[0]
+        limit_zero = LIMIT_RE.search(args[1])
+        if not limit_zero:
+            return func(*args, **kwargs)
+        original_offset = OFFSET_RE.search(args[1])
+        has_more = False
+        url = re.sub(r'limit=0', 'limit=%d' % self.limit, args[1])
+        response = func(self, url, **kwargs)
+        r_json = response.json()
+        offset = None
+        content_length = int(response.headers['Content-Length'])
+        if isinstance(r_json, list) and len(r_json) == self.limit:
+            offset = r_json[-1]['id']
+            has_more = True
+        if original_offset and offset:
+            url = re.sub(r'offset=[0-9a-fA-F]{24}', 'offset=%s' % offset, url)
+        elif offset:
+            url += '&offset=%s' % offset
+        while has_more:
+            r = func(self, url, **kwargs)
+            r_json = r.json()
+            setattr(response, '_content', b','.join([response.content[:-1], r.content[1:]]))
+            content_length += int(r.headers['Content-Length'])
+            if len(r_json) < self.limit:
+                has_more = False
+            else:
+                offset = r_json[-1]['id']
+                url = re.sub(r'offset=[0-9a-fA-F]{24}', 'offset=%s' % offset, url)
+        response.headers['Content-Length'] = str(content_length)
+        return response
+
+    return wrapper
+
+
+def batch_write_iterator(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        self = args[0]
+        if not (isinstance(kwargs.get('data'), list) and len(kwargs['data']) > self.limit):
+            return func(*args, **kwargs)
+        data = kwargs.pop('data')
+        batch_count = int(len(data) / self.limit)
+        if (len(data) % self.limit) == 0:
+            batch_count -= 1
+        response = func(*args, data=data[:self.limit])
+        content_length = int(response.headers['Content-Length'])
+        for bc in range(batch_count):
+            slice_start = (bc+1) * self.limit
+            slice_stop = slice_start + self.limit
+            if slice_stop > len(data):
+                slice_stop = len(data)
+            r = func(*args, data=data[slice_start:slice_stop])
+            setattr(response, '_content', b','.join([response.content[:-1], r.content[1:]]))
+            content_length += int(r.headers['Content-Length'])
+        return response
+
     return wrapper
 
 
@@ -120,7 +191,8 @@ class MaaSiveAPISession(object):
                  verbose=True,
                  admin_key=None,
                  auth_token=None,
-                 max_history=25):
+                 max_history=25,
+                 limit=100):
         self.api_uri = api_uri
         self.last_call_timestamp = 0
         self.session = requests.Session()
@@ -130,6 +202,7 @@ class MaaSiveAPISession(object):
         self.print_pretty = verbose
         self.verbose = verbose
         self.current_user = None
+        self.limit = limit
         if admin_key and auth_token:
             raise ValueError('use only one of api_key or auth_token')
         self.admin_key = None
@@ -182,9 +255,10 @@ class MaaSiveAPISession(object):
 
     @limit_rate
     @pr_pretty
-    @verbose_output
     @track_history
     @serialize_json_data
+    @limit_zero_read_iterator
+    @verbose_output
     def get(self, url, **kwargs):
         return self.session.get(''.join([self.api_uri, url]), **kwargs)
 
@@ -192,6 +266,7 @@ class MaaSiveAPISession(object):
     @pr_pretty
     @verbose_output
     @track_history
+    @batch_write_iterator
     @serialize_json_data
     def post(self, url, **kwargs):
         return self.session.post(''.join([self.api_uri, url]), **kwargs)
@@ -200,6 +275,7 @@ class MaaSiveAPISession(object):
     @pr_pretty
     @verbose_output
     @track_history
+    @batch_write_iterator
     @serialize_json_data
     def put(self, url, **kwargs):
         return self.session.put(''.join([self.api_uri, url]), **kwargs)
@@ -209,5 +285,6 @@ class MaaSiveAPISession(object):
     @verbose_output
     @track_history
     @serialize_json_data
+    @limit_zero_read_iterator
     def delete(self, url, **kwargs):
         return self.session.delete(''.join([self.api_uri, url]), **kwargs)

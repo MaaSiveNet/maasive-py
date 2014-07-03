@@ -19,6 +19,10 @@ Check us out at [https://maassive.net](https://maassive.net)
 
 ## Changelog
 
+**version 1.2.2**
+
+- automatic batching of large reads and writes
+
 **version 1.2.1**
 
 - APISession object to package init

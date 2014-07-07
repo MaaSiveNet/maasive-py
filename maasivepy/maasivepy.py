@@ -257,7 +257,6 @@ class MaaSiveAPISession(object):
     @pr_pretty
     @track_history
     @serialize_json_data
-    @limit_zero_read_iterator
     @verbose_output
     def get(self, url, **kwargs):
         return self.session.get(''.join([self.api_uri, url]), **kwargs)

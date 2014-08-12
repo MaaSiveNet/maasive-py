@@ -6,7 +6,7 @@ A Python SDK for MaaSive.net
 
 Install with pip
 
-    $ pip install git+https://github.com/MaaSiveNet/maasive-py.git@v1.2.5#egg=maasive-py
+    $ pip install git+https://github.com/MaaSiveNet/maasive-py.git@v1.2.6#egg=maasive-py
 
 ## Usage
 

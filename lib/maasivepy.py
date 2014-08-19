@@ -55,22 +55,26 @@ def verbose_output(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         self = args[0]
+        start = time()
         r = func(*args, **kwargs)
+        end = time()
         if self.verbose is not True:
             return r
         if r.status_code == requests.codes.ok:
-            status_msg = '%d %s %s in %s ms' % (
+            status_msg = '%d %s %s in %.2f ms for %.2f ms' % (
                 r.status_code,
                 str(func.__name__).upper(),
                 str(r.url),
-                str(r.elapsed.microseconds / 1000)
+                (r.elapsed.microseconds / 1000),
+                ((end - start)*1000)
             )
         else:
-            status_msg = '%d %s %s in %s ms - %s' % (
+            status_msg = '%d %s %s in %.2f ms for %.2f - %s' % (
                 r.status_code,
                 str(func.__name__).upper(),
                 str(r.url),
-                str(r.elapsed.microseconds / 1000),
+                (r.elapsed.microseconds / 1000),
+                ((end - start)*1000),
                 r.reason
             )
         print(status_msg)
@@ -264,7 +268,7 @@ class MaaSiveAPISession(object):
     @limit_rate
     @pr_pretty
     @track_history
-    @batch_write_iterator
+    # @batch_write_iterator
     @verbose_output
     @serialize_json_data
     def post(self, url, **kwargs):
@@ -273,7 +277,6 @@ class MaaSiveAPISession(object):
     @limit_rate
     @pr_pretty
     @track_history
-    @batch_write_iterator
     @verbose_output
     @serialize_json_data
     def put(self, url, **kwargs):
@@ -283,7 +286,6 @@ class MaaSiveAPISession(object):
     @pr_pretty
     @track_history
     @serialize_json_data
-    @limit_zero_read_iterator
     @verbose_output
     def delete(self, url, **kwargs):
         return self.session.delete(''.join([self.api_uri, url]), **kwargs)

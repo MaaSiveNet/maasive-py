@@ -5,5 +5,5 @@ setup(
     version='1.2.5',
     author='Josh Austin',
     author_email='josh@maasive.net',
-    py_modules=['maasivepy.maasivepy'],
+    py_modules=['maasivepy'],
 )

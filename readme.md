@@ -6,13 +6,13 @@ A Python SDK for MaaSive.net
 
 Install with pip
 
-    $ pip install git+https://github.com/MaaSiveNet/maasive-py.git@v1.2.5#egg=maasive-py
+    $ pip install git+https://github.com/MaaSiveNet/maasive-py.git#egg=maasive-py
 
 ## Usage
 
-    from maasivepy import MaaSiveAPISession
+    import maasivepy
 
-    m = maasivepy.MaaSiveAPISession('https://api.maasive.net/v2/52957bacc3034e4a0fe22f78', print_pretty=True)
+    m = maasivepy.APISession('https://api.maasive.net/v2/52957bacc3034e4a0fe22f78', print_pretty=True)
     m.get('/comments/')
 
 Check us out at [https://maassive.net](https://maassive.net)

@@ -289,3 +289,16 @@ class MaaSiveAPISession(object):
     @verbose_output
     def delete(self, url, **kwargs):
         return self.session.delete(''.join([self.api_uri, url]), **kwargs)
+
+    def export_csv(self, url, **kwargs):
+        import csv
+        f = kwargs.pop('csvfile')
+        r_options = self.options(url, **kwargs)
+        headers = ['id']
+        headers.extend(sorted(r_options.json()['resource'].keys()))
+        r_get = self.get(url, **kwargs)
+        writer = csv.DictWriter(f, headers, extrasaction='ignore')
+        writer.writeheader()
+        for i in r_get.json():
+            writer.writerow(i)
+        return r_get

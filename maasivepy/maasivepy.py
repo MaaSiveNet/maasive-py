@@ -37,7 +37,7 @@ def limit_rate(func):
 def print_json(json_data, indent=4):
     if json_data is None:
         print()
-    print(json.dumps(json_data.json(), indent=indent))
+    print(json.dumps(json_data, indent=indent))
 
 
 def pr_pretty(func):
@@ -49,7 +49,7 @@ def pr_pretty(func):
             re.search('application/json', r_content_type),
         ]
         if all(pretty_req):
-            r.pprint = partial(print_json, r)
+            r.pprint = partial(print_json, r.json())
         else:
             r.pprint = partial(print_json, None)
         return r

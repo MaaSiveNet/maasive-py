@@ -1,4 +1,4 @@
-#MaaSivePy
+# MaaSivePy
 
 A Python SDK for MaaSive.net
 
@@ -6,7 +6,7 @@ A Python SDK for MaaSive.net
 
 Install with pip
 
-    $ pip install git+https://github.com/MaaSiveNet/maasive-py.git#egg=maasive-py
+    pip install git+https://github.com/MaaSiveNet/maasive-py.git#egg=maasive-py
 
 ## RESTful Usage
 
@@ -122,8 +122,89 @@ Sometimes you just need to get your resources as CSV files instead of JSON.
     
     In [15]: f.close()
 
+### Command line tool
 
-Check us out at [https://maassive.net](https://maassive.net)
+Some of the functionality of maasivepy has been exposed as a command line tool.
+
+#### Authentication
+
+You can authenticate to the API using either an API key or a username and password.  Create a configuration file `myconfig.json` that looks like this:
+
+    {
+        "endpoint": "https://my-api.maasive.net/vX.X.X/",
+        "username": "user@address.com",
+        "password": "<password>",
+        "API-key": "xxxxxxxxxxxxxxxxx",
+        "newUserDefaultPassword": "<password>"
+    }
+
+You must define `endpoint` and either `username` and `password` or `API-key` for authenticated requests to work.  The `username` and `password` are only used if the `API-key` is not defined.  The `newUserDefaultPassword` value is used when creating new items on the `users` collection with the `--bulk` flag set. The default value for `newUserDefaultPassword` is `password`.
+
+You can pass either the path to this configuration file or its raw contents in every request using the `--config` option, or you can set an environmental variable identifying the location of the configuration file.
+
+    export MAASIVEAPICONF=/path/to/myconfig.json
+
+Once this is set, all requests to the API will work without having to pass the configuration on each request.
+
+### Usage examples
+
+Get help and list options
+
+    maasivecommand --help
+
+Get the OPTIONS response for the `device` endpoint
+
+    maasivecommand devices
+    # OR
+    maasivecommand devices -m OPTIONS
+
+Get a list of all devices
+
+    maasivecommand devices -m GET
+
+Upload a single device entry
+
+    maasivecommand devices -m POST -i device.json
+
+Bulk upload/edit devices.  The `id` field of each record will be retained if it exists, so existing records will be updated
+
+    maasivecommand devices -m POST -i devices.json
+
+Bulk upload new devices.  The `id` field of each record will be stripped before the records are POSTed
+
+    maasivecommand devices -m POST -i devices.json -b
+
+Delete a device
+
+    maasivecommand devices -m DELETE --id 5489d59dc5a9fa046b3196b4
+
+Get record for user with a specific id
+
+    maasivecommand users -m GET --id 54876421c5a9fa046b31165d
+
+Get all devices produced in version 1 of that endpoint
+
+    maasivecommand devices -m GET -q '{"_version": 1}'
+
+Update the `roles` attribute for a specific user
+
+    maasivecommand users -m PUT --id 5489abebc5a9fa046b3179e5 -i user.json
+    # user.json has the following contents
+    # {"roles": ["user", "tenant_admin", "cs_admin"]}
+
+Delete each item matching a query
+
+    # This is calling DELETE for each value in lieu of a batch DELETE method
+    maasivecommand devices -m GET -q '{"_version": 1}' -k id | xargs -I itemid ./src/devices.py -m DELETE --id itemid
+
+Count the number of items
+
+    # This grabs the `id` field of each result and puts it on a separate line to make counting simpler
+    maasivecommand devices -m GET -k id | wc -l
+
+Pass in a custom configuration file
+
+    maasivecommand events -m GET --config=analytics.conf -l 1
 
 ## Changelog
 
@@ -158,3 +239,5 @@ Check us out at [https://maassive.net](https://maassive.net)
 - automatic serialization to JSON
 - built-in pretty print to response objects and APISession
 - support for X-Admin-Key and X-Auth-Token headers in APISession constructor
+
+Check us out at [https://maassive.net](https://maassive.net)

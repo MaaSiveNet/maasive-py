@@ -1,3 +1,7 @@
 .idea
+*.pyc
 __pycache__
 maasivepy.egg-info
+/build
+/dist
+

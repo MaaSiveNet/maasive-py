@@ -6,3 +6,4 @@ __copyright__ = 'Copyright 2014 Josh Austin'
 
 
 from .maasivepy import MaaSiveAPISession as APISession
+from .maasivepy import print_json

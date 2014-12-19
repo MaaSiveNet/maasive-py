@@ -128,7 +128,7 @@ Some of the functionality of maasivepy has been exposed as a command line tool.
 
 #### Authentication
 
-You can authenticate to the API using either an API Key or a username and password.  Create a configuration file `myconfig.json` that looks like this:
+You can authenticate to the API using either an API key or a username and password.  Create a configuration file `myconfig.json` that looks like this:
 
     {
         "endpoint": "https://my-api.maasive.net/vX.X.X/",
@@ -138,21 +138,21 @@ You can authenticate to the API using either an API Key or a username and passwo
         "newUserDefaultPassword": "<password>"
     }
 
-You must define "endpoint" and either "username" and "password" or "API-key" for authenticated requests to work.  The username and password are only used if the API key is not defined.  The "newUserDefaultPassword" value is used when creating new items on the `users` collection (with the "--bulk" flag set). The default value for "newUserDefaultPassword" is "password".
+You must define `endpoint` and either `username` and `password` or `API-key` for authenticated requests to work.  The `username` and `password` are only used if the `API-key` is not defined.  The `newUserDefaultPassword` value is used when creating new items on the `users` collection with the `--bulk` flag set. The default value for `newUserDefaultPassword` is `password`.
 
-You can pass the path to this configuration file in to every request using the `--config` option, or you can set an environmental variable identifying its location.
+You can pass either the path to this configuration file or its raw contents in every request using the `--config` option, or you can set an environmental variable identifying the location of the configuration file.
 
     export MAASIVEAPICONF=/path/to/myconfig.json
 
-Once this is set, all requests to the API will work without you having to pass in the configuration on each request.
+Once this is set, all requests to the API will work without having to pass the configuration on each request.
 
 ### Usage examples
 
-Get help
+Get help and list options
 
     maasivecommand --help
 
-Get `device` endpoint options
+Get the OPTIONS response for the `device` endpoint
 
     maasivecommand devices
     # OR

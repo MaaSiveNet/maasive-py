@@ -44,7 +44,7 @@ def pr_pretty(func):
         ]
         pretty = None
         if all(pretty_req):
-            pretty = r.json()
+            pretty = json.dumps(r.json(), indent=4)
         r.pprint = partial(lib_pprint, pretty)
         return r
 

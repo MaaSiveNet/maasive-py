@@ -34,6 +34,10 @@ def limit_rate(func):
     return wrapper
 
 
+def print_json(json_string):
+    print(json_string)
+
+
 def pr_pretty(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -45,7 +49,7 @@ def pr_pretty(func):
         pretty = None
         if all(pretty_req):
             pretty = json.dumps(r.json(), indent=4)
-        r.pprint = partial(print, pretty)
+        r.pprint = partial(print_json, pretty)
         return r
 
     return wrapper

@@ -4,7 +4,6 @@ import argparse
 import json
 import os
 import sys
-from types import ListType
 
 import maasivepy
 
@@ -34,7 +33,7 @@ class CommandLineTool(object):
         ##########################
         self.args.config = self.args.config or os.environ.get('MAASIVEAPICONF')
         if not self.args.config:
-            print "'MAASIVEAPICONF' environmental variable is not set and no configuration was passed. Exiting."
+            print("'MAASIVEAPICONF' environmental variable is not set and no configuration was passed. Exiting.")
             sys.exit(1)
         
         conf = self.get_input(self.args.config)
@@ -107,24 +106,24 @@ class CommandLineTool(object):
             res = self.MAASIVE_SESSION.get("%s" % (self.URL), params=params).json()
 
         if not self.args.key:
-            print json.dumps(res, indent=4)
+            print(json.dumps(res, indent=4))
         else:
             for item in res:
-                print item.get(self.args.key)
+                print(item.get(self.args.key))
 
     def put_items(self):
         if not self.args.id:
-            print "PUT currently requires a single object id"
+            print("PUT currently requires a single object id")
             sys.exit(1)
 
         if not self.args.inputstring:
-            print "PUT requires data to be passed via the `--inputstring` argument"
+            print("PUT requires data to be passed via the `--inputstring` argument")
             sys.exit(1)
 
         d = json.dumps(self.get_input(self.args.inputstring))
 
         res = self.MAASIVE_SESSION.put("%s%s" % (self.URL, self.args.id), data=d).json()
-        print json.dumps(res, indent=4)
+        print(json.dumps(res, indent=4))
 
     def post_items(self):
         """Opening the file and reading as JSON ensures a correctly formatted datafile before the
@@ -132,7 +131,7 @@ class CommandLineTool(object):
         o = self.get_input(self.args.inputstring)
 
         # If it is a bulk upload, remove the id field of each item
-        if type(o) is ListType:
+        if isinstance(o, list):
             for item in o:
                 # Remove the id field of each item
                 if self.args.bulkadd and 'id' in item.keys():
@@ -144,7 +143,7 @@ class CommandLineTool(object):
 
         d = json.dumps(o)
         res = self.MAASIVE_SESSION.post(self.URL, data=d).json()
-        print json.dumps(res, indent=4)
+        print(json.dumps(res, indent=4))
 
     def delete_item(self):
         if self.args.id:
@@ -154,11 +153,11 @@ class CommandLineTool(object):
             #print "DELETE requires an id"
             #sys.exit(1)
 
-        print json.dumps(res, indent=4)
+        print(json.dumps(res, indent=4))
 
     def get_options(self):
         res = self.MAASIVE_SESSION.options(self.URL).json()
-        print json.dumps(res, indent=4)
+        print(json.dumps(res, indent=4))
 
 
 def main():

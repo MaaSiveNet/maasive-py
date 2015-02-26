@@ -2,11 +2,16 @@ __author__ = 'ntrepid8'
 from functools import wraps, partial
 from collections import deque
 from time import time, sleep
-from pprint import pprint as lib_pprint
+from pprint import pformat as lib_pformat
 import requests
 import json
 import re
+import logging
+import sys
 
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format="%(message)s")
+logging.getLogger("requests").setLevel(logging.WARNING)
+logger = logging.getLogger(__name__)
 
 def limit_rate(func):
     @wraps(func)
@@ -19,7 +24,7 @@ def limit_rate(func):
             if self.rl_window_count >= self.rps:
                 sleep_time = time() - self.rl_window_ts
                 if self.verbose is True:
-                    print('sleeping for %s...' % str(sleep_time))
+                    logger.info('sleeping for %s...' % str(sleep_time))
                 sleep(sleep_time)
                 self.rl_window_count = 0
                 self.rl_window_ts = time()
@@ -40,6 +45,12 @@ def print_json(json_data, indent=4):
     print(json.dumps(json_data, indent=indent))
 
 
+def log_json(json_data, indent=4):
+    if json_data is None:
+        logger.info()
+    logger.info(json.dumps(json_data, indent=indent))
+
+
 def pr_pretty(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -49,9 +60,9 @@ def pr_pretty(func):
             re.search('application/json', r_content_type),
         ]
         if all(pretty_req):
-            r.pprint = partial(print_json, r.json())
+            r.pprint = partial(log_json, r.json())
         else:
-            r.pprint = partial(print_json, None)
+            r.pprint = partial(log_json, None)
         return r
 
     return wrapper
@@ -83,7 +94,7 @@ def verbose_output(func):
                 ((end - start)*1000),
                 r.reason
             )
-        print(status_msg)
+        logger.info(status_msg)
         return r
 
     return wrapper
@@ -256,7 +267,7 @@ class MaaSiveAPISession(object):
         args = args[1:]
         if isinstance(arg_0, str):
             arg_0 = getattr(self, arg_0)
-        lib_pprint(arg_0, *args, **kwargs)
+        logger.info(lib_pformat(arg_0, *args, **kwargs))
 
     @limit_rate
     @pr_pretty

@@ -41,7 +41,8 @@ class CommandLineTool(object):
         self.NEW_USER_PASSWORD = conf.get('newUserDefaultPassword', 'password')  # default new password
 
         # Can authenticate with username and password or API key
-        self.APIKEY = conf.get('API-key')
+        self.APIKEY = conf.get('API-Key')
+        self.ADMINKEY = conf.get('Admin-Key')
         self.USERNAME = conf.get('username')
         self.PASSWORD = conf.get('password')
 
@@ -56,7 +57,9 @@ class CommandLineTool(object):
         options = dict()
         options["verbose"] = self.args.verbose
         if self.APIKEY:
-            options["admin_key"] = self.APIKEY
+            options["api_key"] = self.APIKEY
+        if self.ADMINKEY:
+            options["admin_key"] = self.ADMINKEY
 
         self.MAASIVE_SESSION = maasivepy.MaaSiveAPISession(
             self.API_ENDPOINT,
@@ -64,7 +67,7 @@ class CommandLineTool(object):
         )
 
         # Login if no api key available
-        if not self.APIKEY and (self.USERNAME and self.PASSWORD):
+        if not (self.APIKEY or self.ADMINKEY) and (self.USERNAME and self.PASSWORD):
             self.MAASIVE_SESSION.login(self.USERNAME, self.PASSWORD)
 
     def run(self):

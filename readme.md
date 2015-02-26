@@ -134,7 +134,7 @@ You can authenticate to the API using either an API key or a username and passwo
         "endpoint": "https://my-api.maasive.net/vX.X.X/",
         "username": "user@address.com",
         "password": "<password>",
-        "API-key": "xxxxxxxxxxxxxxxxx",
+        "API-Key": "xxxxxxxxxxxxxxxxx",
         "newUserDefaultPassword": "<password>"
     }
 
@@ -195,7 +195,7 @@ Update the `roles` attribute for a specific user
 Delete each item matching a query
 
     # This is calling DELETE for each value in lieu of a batch DELETE method
-    maasivecommand devices -m GET -q '{"_version": 1}' -k id | xargs -I itemid ./src/devices.py -m DELETE --id itemid
+    maasivecommand devices -m GET -q '{"_version": 1}' -k id | xargs -I itemid maasivecommand devices -m DELETE --id itemid
 
 Count the number of items
 
